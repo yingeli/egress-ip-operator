@@ -1,0 +1,20 @@
+# permissions for end users to view egressips.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: egressip-viewer-role
+rules:
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips/status
+  verbs:
+  - get

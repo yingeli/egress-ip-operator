@@ -1,0 +1,7 @@
+ipcp-accept-local
+ipcp-accept-remote
+noauth
+mtu 1410
+mru 1410
+defaultroute
+replacedefaultroute

@@ -1,0 +1,24 @@
+domain: yingeli.github.com
+layout:
+- go.kubebuilder.io/v3
+projectName: egress-ip-operator
+repo: github.com/yingeli/egress-ip-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: yingeli.github.com
+  group: egressip
+  kind: EgressIP
+  path: github.com/yingeli/egress-ip-operator/api/v1alpha1
+  version: v1alpha1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+- controller: true
+  domain: yingeli.github.com
+  kind: Pod
+  version: v1
+version: "3"

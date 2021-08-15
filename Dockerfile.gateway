@@ -1,0 +1,23 @@
+# Build the egress-ip-phase binary
+FROM golang:1.16 as builder
+COPY ./ /go/src/github.com/yingeli/egress-ip-operator/
+WORKDIR /go/src/github.com/yingeli/egress-ip-operator
+RUN go mod download
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o ./gateway/egress-ip-phase/bin/egress-ip-phase -a ./gateway/egress-ip-phase/main.go
+
+#FROM gcr.io/distroless/static:nonroot
+FROM alpine:latest
+COPY --from=builder /go/src/github.com/yingeli/egress-ip-operator/gateway/egress-ip-phase/bin/egress-ip-phase /usr/local/bin/
+RUN apk add --no-cache xl2tpd ppp iptables\
+    && mkdir -p /var/run/xl2tpd \
+    && touch /var/run/xl2tpd/l2tp-control
+COPY ./gateway/xl2tpd.conf /etc/xl2tpd/xl2tpd.conf
+COPY ./gateway/options.xl2tpd /etc/ppp/options.xl2tpd
+COPY ./gateway/init.sh /
+RUN chmod 755 /init.sh
+COPY ./gateway/run.sh /
+RUN chmod 755 /run.sh
+#USER nonroot:nonroot
+#ENTRYPOINT ["/usr/local/bin/azure-associate-ip"]
+CMD ["/run.sh"]

@@ -1,0 +1,96 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - yingeli.github.com
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - yingeli.github.com
+  resources:
+  - pods/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - yingeli.github.com
+  resources:
+  - pods/status
+  verbs:
+  - get
+  - patch
+  - update

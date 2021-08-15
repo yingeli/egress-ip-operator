@@ -1,0 +1,24 @@
+# permissions for end users to edit egressips.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: egressip-editor-role
+rules:
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - egressip.yingeli.github.com
+  resources:
+  - egressips/status
+  verbs:
+  - get

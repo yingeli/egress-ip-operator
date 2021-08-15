@@ -1,0 +1,46 @@
+apiVersion: egressip.yingeli.github.com/v1alpha1
+kind: EgressIP
+metadata:
+  name: egress-ip-001
+  namespace: egress-ip
+spec:
+  ip: 40.73.39.56
+  podSelector:
+    matchLabels:
+      app: curl-001
+
+---
+apiVersion: egressip.yingeli.github.com/v1alpha1
+kind: EgressIP
+metadata:
+  name: egress-ip-002
+  namespace: egress-ip
+spec:
+  ip: 139.217.107.133
+  podSelector:
+    matchLabels:
+      app: curl-002
+
+---
+apiVersion: egressip.yingeli.github.com/v1alpha1
+kind: EgressIP
+metadata:
+  name: egress-ip-003
+  namespace: egress-ip
+spec:
+  ip: 139.217.101.151
+  podSelector:
+    matchLabels:
+      app: curl-003
+
+---
+apiVersion: egressip.yingeli.github.com/v1alpha1
+kind: EgressIP
+metadata:
+  name: egress-ip-004
+  namespace: egress-ip
+spec:
+  ip: 52.130.150.173
+  podSelector:
+    matchLabels:
+      app: curl-004

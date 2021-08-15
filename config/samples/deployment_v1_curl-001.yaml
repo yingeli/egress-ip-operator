@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-001
+  labels:
+    app: curl-001
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: curl-001
+  template:
+    metadata:
+      labels:
+        app: curl-001
+    spec:
+      containers:
+      - name: curl
+        image: curlimages/curl
+        command: ['sh', '-c', "sleep 3600"]
