@@ -19,10 +19,12 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+
 	//"fmt"
 	"net/http"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -73,17 +75,34 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 				Name:  "LOCAL_NETWORK",
 				Value: "10.0.0.0/8",
 			},
-			//			{
-			//				Name: "POD_IP",
-			//				ValueFrom: &corev1.EnvVarSource{
-			//					FieldRef: &corev1.ObjectFieldSelector{
-			//						FieldPath: "status.podIP",
-			//					},
-			//				},
-			//			},
 		},
 	}
 	pod.Spec.Containers = append(pod.Spec.Containers, director)
+
+	if pod.Spec.Affinity == nil {
+		pod.Spec.Affinity = &corev1.Affinity{}
+	}
+
+	if pod.Spec.Affinity.PodAffinity == nil {
+		pod.Spec.Affinity.PodAffinity = &corev1.PodAffinity{}
+	}
+
+	term := corev1.WeightedPodAffinityTerm{
+		Weight: 100,
+		PodAffinityTerm: corev1.PodAffinityTerm{
+			LabelSelector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"egress-ip-name": eip.Name,
+				},
+			},
+			Namespaces:  []string{eip.Namespace},
+			TopologyKey: "kubernetes.io/hostname",
+		},
+	}
+
+	pod.Spec.Affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution = append(
+		pod.Spec.Affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution,
+		term)
 
 	marshaledPod, err := json.Marshal(pod)
 	if err != nil {
