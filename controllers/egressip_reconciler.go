@@ -147,7 +147,7 @@ func newEgressIPDeployment(eip *egressipv1alpha1.EgressIP) *appsv1.Deployment {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      eip.Name,
-			Namespace: eip.Namespace,
+			//Namespace: eip.Namespace,
 		},
 	}
 	updateEgressIPDeployment(&deployment, eip)
@@ -163,43 +163,45 @@ func updateEgressIPDeployment(deployment *appsv1.Deployment, eip *egressipv1alph
 	deployment.Spec = appsv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: map[string]string{
-				"app": getAppName(eip),
+				//"app": getAppName(eip),
+				"egress-ip": eip.Spec.IP,
 			},
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: map[string]string{
-					"app":            getAppName(eip),
-					"egress-ip":      eip.Spec.IP,
-					"egress-ip-name": eip.Name,
-					"control-plane":  "controller-manager",
+					//"app":            	getAppName(eip),
+					"control-plane":  		"controller-manager",
+					"egress-ip":      		eip.Spec.IP,
+					"egress-ip-namespace": 	eip.Namespace,
+					"egress-ip-name": 		eip.Name,
 				},
 			},
 			Spec: corev1.PodSpec{
 				Containers: []corev1.Container{{
-					Image:           "yingeli/egress-ip-gateway",
-					ImagePullPolicy: "Always",
-					Name:            "gateway",
-					Env:             getEnv(eip),
+					Image:           		"yingeli/egress-ip-gateway",
+					ImagePullPolicy: 		"Always",
+					Name:            		"gateway",
+					Env:             		getEnv(eip),
 					Ports: []corev1.ContainerPort{
 						{
-							ContainerPort: 1701,
-							Protocol:      "UDP",
-							Name:          "l2tp",
+							ContainerPort: 	1701,
+							Protocol:      	"UDP",
+							Name:          	"l2tp",
 						},
 					},
 					SecurityContext: &seccurityContext,
 				}},
 				InitContainers: []corev1.Container{{
-					Image:           "yingeli/egress-ip-gateway",
-					ImagePullPolicy: "Always",
-					Name:            "gateway-init",
+					Image:           		"yingeli/egress-ip-gateway",
+					ImagePullPolicy: 		"Always",
+					Name:            		"gateway-init",
 					Command: []string{
 						"/init.sh",
 					},
 					Env: getEnv(eip),
 				}},
-				ServiceAccountName: "egress-ip-controller-manager",
+				ServiceAccountName: 		"egress-ip-controller-manager",
 			},
 		},
 	}
@@ -216,14 +218,10 @@ func getEnv(eip *egressipv1alpha1.EgressIP) []corev1.EnvVar {
 			Value: eip.Name,
 		},
 		{
-			Name:  "EGRESS_PUBLIC_IP",
+			Name:  "EGRESS_IP",
 			Value: eip.Spec.IP,
 		},
 	}
-}
-
-func getAppName(eip *egressipv1alpha1.EgressIP) string {
-	return eip.Name + "-gateway"
 }
 
 func newEgressIPService(eip *egressipv1alpha1.EgressIP) *corev1.Service {
@@ -234,7 +232,7 @@ func newEgressIPService(eip *egressipv1alpha1.EgressIP) *corev1.Service {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      eip.Name,
-			Namespace: eip.Namespace,
+			//Namespace: eip.Namespace,
 		},
 	}
 	updateEgressIPService(&service, eip)
@@ -244,7 +242,8 @@ func newEgressIPService(eip *egressipv1alpha1.EgressIP) *corev1.Service {
 func updateEgressIPService(service *corev1.Service, eip *egressipv1alpha1.EgressIP) {
 	service.Spec = corev1.ServiceSpec{
 		Selector: map[string]string{
-			"app": getAppName(eip),
+			//"app": getAppName(eip),
+			"egress-ip": eip.Spec.IP,
 		},
 		ClusterIP: "None",
 	}
@@ -267,6 +266,10 @@ func containsString(slice []string, s string) bool {
 }
 
 /*
+func getAppName(eip *egressipv1alpha1.EgressIP) string {
+	return eip.Namespace + "-" + eip.Name + "-gateway"
+}
+
 func removeString(slice []string, s string) (result []string) {
     for _, item := range slice {
         if item == s {

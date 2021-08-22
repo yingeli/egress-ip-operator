@@ -159,7 +159,7 @@ func (r *GatewayReconciler) associate(ctx context.Context, ipt *iptables.IPTable
 		return err
 	}
 
-	if err := r.updateEgressIPStatusPhase(ctx, pod.Namespace, pod.Labels["egress-ip-name"], "Configured"); err != nil {
+	if err := r.updateEgressIPStatusPhase(ctx, pod.Labels["egress-ip-namespace"], pod.Labels["egress-ip-name"], "Configured"); err != nil {
 		return err
 	}
 

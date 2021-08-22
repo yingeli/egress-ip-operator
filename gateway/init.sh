@@ -2,7 +2,7 @@
 
 /usr/local/bin/egress-ip-phase $EGRESS_IP_NAMESPACE $EGRESS_IP_NAME update "Configuring"
 if [ $? -ne 0 ]; then
-   echo "Failed to update status for EgressIP "$EGRESS_PUBLIC_IP
+   echo "Failed to update status for EgressIP "$EGRESS_IP
    exit 1
 fi
 
@@ -11,11 +11,11 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
-echo "Local IP is "$local_ip". Waiting for configuring EgressIP "$EGRESS_PUBLIC_IP
+echo "Local IP is "$local_ip". Waiting for configuring EgressIP "$EGRESS_IP
 /usr/local/bin/egress-ip-phase $EGRESS_IP_NAMESPACE $EGRESS_IP_NAME wait "Configured"
 if [ $? -ne 0 ]; then
-   echo "Failed to wait for configuring EgressIP "$EGRESS_PUBLIC_IP
+   echo "Failed to wait for configuring EgressIP "$EGRESS_IP
    exit 1
 fi
 
-echo "Successfully confgiured EgressIP "$EGRESS_PUBLIC_IP" on "$local_ip
+echo "Successfully confgiured EgressIP "$EGRESS_IP" on "$local_ip

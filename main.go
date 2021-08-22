@@ -139,7 +139,6 @@ func getOptions(runningDaemon bool) (options ctrl.Options, err error) {
 
 	options = ctrl.Options{
 		Scheme:                 scheme,
-		Namespace:              "egress-ip", //yingeli
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
@@ -148,6 +147,8 @@ func getOptions(runningDaemon bool) (options ctrl.Options, err error) {
 	}
 
 	if runningDaemon {
+		options.Namespace = os.Getenv("NAMESPACE")
+		
 		options.LeaderElection = false
 
 		fs, ls, err := controllers.GatewayPodSelectors()
