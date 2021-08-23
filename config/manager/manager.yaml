@@ -21,6 +21,7 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
+        control-plane-service: webhooks
     spec:
       #securityContext:
       #  runAsNonRoot: true

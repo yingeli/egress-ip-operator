@@ -79,17 +79,9 @@ func (p *Provider) associate(ctx context.Context, publicIPAddr string, localIPAd
 	}
 
 	if pip.IPConfiguration != nil {
-		r, err := network.ParseIPConfigurationID(*pip.IPConfiguration.ID)
+		err = network.DissociatePublicIP(ctx, &pip, ipconfigPrefix)
 		if err != nil {
-			return sourceIPAddr, fmt.Errorf("ParseIPConfigurationID error: %v", err)
-		}
-		nic, err := network.GetNic(ctx, r.NicName)
-		if err != nil {
-			return sourceIPAddr, fmt.Errorf("GetNic error: %v", err)
-		}
-		err = network.DissociateNicPublicIP(ctx, nic, *pip.IPAddress, ipconfigPrefix)
-		if err != nil {
-			return sourceIPAddr, fmt.Errorf("DissociateNicIPConfigurationWithPublicIP error: %v", err)
+			return sourceIPAddr, fmt.Errorf("DissociatePublicIP error: %v", err)
 		}
 	}
 
@@ -134,7 +126,7 @@ func (p *Provider) dissociate(ctx context.Context, privateIPAddr string) error {
 		}
 
 		if nic.Primary == nil || *nic.Primary {
-			return network.DissociateNicPublicIPWithPrivateIP(ctx, nic, privateIPAddr, ipconfigPrefix)
+			return network.DissociateNicPublicIPWithPrivateIP(ctx, &nic, privateIPAddr, ipconfigPrefix)
 		}
 	}
 	return fmt.Errorf("cannot find primary nic on VM %s", p.vm)

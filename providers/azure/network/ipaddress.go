@@ -91,7 +91,7 @@ func LookupPublicIP(ctx context.Context, address string) (ip network.PublicIPAdd
 	return ip, false, nil
 }
 
-func DissociatePublicIP(ctx context.Context, pip network.PublicIPAddress, ipconfigPrefixToDelete string) error {
+func DissociatePublicIP(ctx context.Context, pip *network.PublicIPAddress, ipconfigPrefixToDelete string) error {
 	if pip.IPConfiguration != nil {
 		r, err := ParseIPConfigurationID(*pip.IPConfiguration.ID)
 		if err != nil {
@@ -103,7 +103,7 @@ func DissociatePublicIP(ctx context.Context, pip network.PublicIPAddress, ipconf
 			return fmt.Errorf("GetNic error: %v", err)
 		}
 
-		err = DissociateNicPublicIP(ctx, nic, *pip.IPAddress, ipconfigPrefixToDelete)
+		err = DissociateNicPublicIP(ctx, &nic, *pip.IPConfiguration.ID, ipconfigPrefixToDelete)
 		if err != nil {
 			return fmt.Errorf("DissociateNicWithPublicIP error: %v", err)
 		}

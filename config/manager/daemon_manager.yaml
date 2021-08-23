@@ -22,8 +22,6 @@ spec:
         image: controller:latest
         name: manager
         env:
-        - name: NAMESPACE
-          value: system
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -55,9 +53,9 @@ spec:
             memory: 20Mi
         securityContext:
           privileged: true
-          capabilities:
-            add:
-            - NET_ADMIN            
+          #capabilities:
+          #  add:
+          #  - NET_ADMIN            
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
 

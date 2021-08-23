@@ -69,7 +69,7 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 		Env: []corev1.EnvVar{
 			{
 				Name:  "EGRESS_GATEWAY",
-				Value: eip.Name + "." + eip.Namespace,
+				Value: getGatewayName(eip) + "." + getGatewayNamespace(),
 			},
 			{
 				Name:  "LOCAL_NETWORK",

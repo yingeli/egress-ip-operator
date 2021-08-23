@@ -36,6 +36,7 @@ import (
 
 type GatewayReconciler struct {
 	client       *client.Client
+	eipc         egressipclients.EgressIPClient
 	provider     providers.Provider
 	log          logr.Logger
 	nodeName     string
@@ -53,19 +54,26 @@ func GatewayPodSelectors() (fs fields.Selector, ls labels.Selector, err error) {
 	return fs, ls, nil
 }
 
-func newGatewayReconciler(client *client.Client, provider providers.Provider) GatewayReconciler {
-	return GatewayReconciler{
+func openGatewayReconciler(client *client.Client, provider providers.Provider) (r GatewayReconciler, err error) {
+	ctx := context.Background()
+	eipc, err := egressipclients.OpenEgressIPClient(ctx)
+	if err != nil {
+		return r, err
+	}
+	r = GatewayReconciler{
 		client:       client,
+		eipc:         eipc,
 		provider:     provider,
 		log:          ctrl.Log.WithName("gateway-reconciler"),
 		nodeName:     os.Getenv("NODE_NAME"),
 		localNetwork: os.Getenv("LOCAL_NETWORK"),
 	}
+	return r, nil
 }
 
-func newAzureGatewayReconciler(client *client.Client) GatewayReconciler {
+func openAzureGatewayReconciler(client *client.Client) (GatewayReconciler, error) {
 	provider := azure.NewProvider()
-	return newGatewayReconciler(client, &provider)
+	return openGatewayReconciler(client, &provider)
 }
 
 func (r *GatewayReconciler) reconcile(ctx context.Context, req ctrl.Request) error {
@@ -159,7 +167,10 @@ func (r *GatewayReconciler) associate(ctx context.Context, ipt *iptables.IPTable
 		return err
 	}
 
-	if err := r.updateEgressIPStatusPhase(ctx, pod.Labels["egress-ip-namespace"], pod.Labels["egress-ip-name"], "Configured"); err != nil {
+	namespace := pod.Labels["egress-ip-namespace"]
+	name := pod.Labels["egress-ip-name"]
+	if err := r.updateEgressIPStatusPhase(ctx, namespace, name, "Configured"); err != nil {
+		r.log.Error(err, "error updating EgressIP status phase", "egress-ip-namespace", namespace, "egress-ip", name)
 		return err
 	}
 
@@ -179,14 +190,14 @@ func (r *GatewayReconciler) dissociate(ctx context.Context, ipt *iptables.IPTabl
 }
 
 func (r *GatewayReconciler) updateEgressIPStatusPhase(ctx context.Context, namespace, name, phase string) error {
-	eipc, err := egressipclients.OpenEgressIPClient(ctx, r.client, namespace, name)
+	eip, err := r.eipc.GetEgressIP(ctx, namespace, name)
 	if err != nil {
+		r.log.Error(err, "error updating EgressIP phase", "namespace", namespace, "name", name)
 		return err
 	}
-	eipc.Status.Phase = phase
-	if err := eipc.UpdateStatus(ctx); err != nil {
+	eip.Status.Phase = phase
+	if err := eip.UpdateStatus(ctx); err != nil {
 		return err
 	}
-	r.log.Info("EgressIP phase updated", "EgressIP.Status", eipc.Status)
 	return nil
 }

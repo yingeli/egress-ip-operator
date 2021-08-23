@@ -93,14 +93,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		//yingeli
 		// Setup injector webhook
 		setupLog.Info("setting up webhook server")
 		hookServer := mgr.GetWebhookServer()
 
 		setupLog.Info("registering webhooks to the webhook server")
 		hookServer.Register("/mutate-v1-pod", &webhook.Admission{Handler: &controllers.EgressIPInjector{Client: mgr.GetClient()}})
-		//yingeli
 	}
 	//+kubebuilder:scaffold:builder
 
@@ -148,7 +146,7 @@ func getOptions(runningDaemon bool) (options ctrl.Options, err error) {
 
 	if runningDaemon {
 		options.Namespace = os.Getenv("NAMESPACE")
-		
+
 		options.LeaderElection = false
 
 		fs, ls, err := controllers.GatewayPodSelectors()

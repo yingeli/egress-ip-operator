@@ -61,7 +61,11 @@ func (r *PodReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	r.gr = newAzureGatewayReconciler(&r.Client) // yingeli
+	gr, err := openAzureGatewayReconciler(&r.Client)
+	if err != nil {
+		return err
+	}
+	r.gr = gr
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.Pod{}).
 		Complete(r)
