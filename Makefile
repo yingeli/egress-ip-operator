@@ -66,13 +66,13 @@ run: manifests generate fmt vet ## Run a controller from your host.
 docker-build: test ## Build docker image with the manager.
 ##  docker build -t ${IMG} . 
 	docker build -t ${IMG_ACCT}/egress-ip-operator:${IMG_TAG} . 
-#	docker build -t ${IMG_ACCT}/egress-ip-gateway:latest -f Dockerfile.gateway .
-#	docker build -t ${IMG_ACCT}/egress-ip-director:latest -f Dockerfile.director .
+	docker build -t ${IMG_ACCT}/egress-ip-gateway:latest -f Dockerfile.gateway .
+	docker build -t ${IMG_ACCT}/egress-ip-director:latest -f Dockerfile.director .
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG_ACCT}/egress-ip-operator:${IMG_TAG}
-#	docker push ${IMG_ACCT}/egress-ip-gateway:latest
-#	docker push ${IMG_ACCT}/egress-ip-director:latest
+	docker push ${IMG_ACCT}/egress-ip-gateway:latest
+	docker push ${IMG_ACCT}/egress-ip-director:latest
 
 ##@ Deployment
 
