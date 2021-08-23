@@ -203,24 +203,30 @@ func AssociateNicWithPublicIP(ctx context.Context, nic network.Interface, ip net
 	return privateIPAddr, fmt.Errorf("failed to get PrivateIPAddress: %v", err)
 }
 
-func DissociateNicPublicIP(ctx context.Context, nic network.Interface, publicIPAddr string, prefixToDelete string) error {
+func DissociateNicPublicIP(ctx context.Context, nic *network.Interface, ipconfigID string, prefixToDelete string) error {
 	ipconfigs := nic.IPConfigurations
+	fmt.Printf("nic.IPConfigurations: %v\n", *ipconfigs)
 	l := len(*ipconfigs)
+	fmt.Printf("len(*ipconfigs): %d\n", l)
 	for i := 0; i < l; i++ {
-		ifconfig := (*ipconfigs)[i]
-		if *(*ifconfig.PublicIPAddress).IPAddress == publicIPAddr {
-			if strings.HasPrefix(*ifconfig.Name, prefixToDelete) {
+		ipconfig := (*ipconfigs)[i]
+		fmt.Printf("ipconfig: %v\n", ipconfig)
+		if *ipconfig.ID == ipconfigID {
+			fmt.Printf("ipconfig.ID == pip.IPConfiguration.ID. ipconfig.ID: %s\n", *ipconfig.ID)
+			if strings.HasPrefix(*ipconfig.Name, prefixToDelete) {
 				copy((*ipconfigs)[i:], (*ipconfigs)[i+1:])
 				*nic.IPConfigurations = (*ipconfigs)[:l-1]
 			} else {
-				ifconfig.PublicIPAddress = nil
+				ipconfig.PublicIPAddress = nil
 			}
 		}
 	}
 
+	fmt.Printf("getNicClient\n")
+
 	nicClient := getNicClient()
 
-	future, err := nicClient.CreateOrUpdate(ctx, config.GroupName(), *nic.Name, nic)
+	future, err := nicClient.CreateOrUpdate(ctx, config.GroupName(), *nic.Name, *nic)
 	if err != nil {
 		return fmt.Errorf("cannot update nic: %v", err)
 	}
@@ -234,12 +240,12 @@ func DissociateNicPublicIP(ctx context.Context, nic network.Interface, publicIPA
 	return err
 }
 
-func DissociateNicPublicIPWithPrivateIP(ctx context.Context, nic network.Interface, privateIPAddr string, prefixToDelete string) error {
+func DissociateNicPublicIPWithPrivateIP(ctx context.Context, nic *network.Interface, privateIPAddr string, prefixToDelete string) error {
 	ipconfigs := nic.IPConfigurations
 	l := len(*ipconfigs)
 	for i := 0; i < l; i++ {
 		ifconfig := (*ipconfigs)[i]
-		if *ifconfig.PrivateIPAddress == privateIPAddr {
+		if ifconfig.PrivateIPAddress != nil && *ifconfig.PrivateIPAddress == privateIPAddr {
 			if strings.HasPrefix(*ifconfig.Name, prefixToDelete) {
 				copy((*ipconfigs)[i:], (*ipconfigs)[i+1:])
 				*nic.IPConfigurations = (*ipconfigs)[:l-1]
@@ -251,7 +257,7 @@ func DissociateNicPublicIPWithPrivateIP(ctx context.Context, nic network.Interfa
 
 	nicClient := getNicClient()
 
-	future, err := nicClient.CreateOrUpdate(ctx, config.GroupName(), *nic.Name, nic)
+	future, err := nicClient.CreateOrUpdate(ctx, config.GroupName(), *nic.Name, *nic)
 	if err != nil {
 		return fmt.Errorf("cannot update nic: %v", err)
 	}

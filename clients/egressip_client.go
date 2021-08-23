@@ -18,8 +18,12 @@ package clients
 
 import (
 	"context"
+	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	egressipv1alpha1 "github.com/yingeli/egress-ip-operator/api/v1alpha1"
@@ -27,31 +31,48 @@ import (
 
 // EgressIPClient
 type EgressIPClient struct {
-	egressipv1alpha1.EgressIP
-	client *client.Client
-	key    types.NamespacedName
+	client.Client
 }
 
-func OpenEgressIPClient(ctx context.Context, c *client.Client, namespace, name string) (eipc EgressIPClient, err error) {
-	k := types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-	eipc = EgressIPClient{
-		EgressIP: egressipv1alpha1.EgressIP{},
-		client:   c,
-		key:      k,
-	}
-	if err := eipc.Refresh(ctx); err != nil {
+type EgressIP struct {
+	client *EgressIPClient
+	egressipv1alpha1.EgressIP
+	key types.NamespacedName
+}
+
+func OpenEgressIPClient(ctx context.Context) (eipc EgressIPClient, err error) {
+	scheme := runtime.NewScheme()
+	utilruntime.Must(egressipv1alpha1.AddToScheme(scheme))
+
+	c, err := client.New(ctrl.GetConfigOrDie(), client.Options{Scheme: scheme})
+	if err != nil {
+		fmt.Printf("error creating client. error: %v\n", err)
 		return eipc, err
 	}
+	eipc = EgressIPClient{c}
 	return eipc, nil
 }
 
-func (c *EgressIPClient) Refresh(ctx context.Context) error {
-	return (*c.client).Get(ctx, c.key, &c.EgressIP)
+func (c *EgressIPClient) GetEgressIP(ctx context.Context, namespace, name string) (eip EgressIP, err error) {
+	eip = EgressIP{
+		client:   c,
+		EgressIP: egressipv1alpha1.EgressIP{},
+		key: types.NamespacedName{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+	if err := eip.Refresh(ctx); err != nil {
+		fmt.Printf("error refreshing EgressIP. Namespace: %s, Name: %s, error: %v\n", eip.key.Namespace, eip.key.Name, err)
+		return eip, err
+	}
+	return eip, nil
 }
 
-func (c *EgressIPClient) UpdateStatus(ctx context.Context) error {
-	return (*c.client).Status().Update(ctx, &c.EgressIP)
+func (e *EgressIP) Refresh(ctx context.Context) error {
+	return e.client.Get(ctx, e.key, &e.EgressIP)
+}
+
+func (e *EgressIP) UpdateStatus(ctx context.Context) error {
+	return e.client.Status().Update(ctx, &e.EgressIP)
 }

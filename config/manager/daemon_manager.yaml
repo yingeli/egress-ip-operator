@@ -26,10 +26,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP        
+        #- name: POD_IP
+        #  valueFrom:
+        #    fieldRef:
+        #      fieldPath: status.podIP        
         #securityContext:
         #  allowPrivilegeEscalation: false
         livenessProbe:
@@ -53,9 +53,9 @@ spec:
             memory: 20Mi
         securityContext:
           privileged: true
-          capabilities:
-            add:
-            - NET_ADMIN            
+          #capabilities:
+          #  add:
+          #  - NET_ADMIN            
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
 

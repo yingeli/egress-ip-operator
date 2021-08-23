@@ -69,7 +69,7 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 		Env: []corev1.EnvVar{
 			{
 				Name:  "EGRESS_GATEWAY",
-				Value: eip.Name + "." + eip.Namespace,
+				Value: getGatewayName(eip) + "." + getGatewayNamespace(),
 			},
 			{
 				Name:  "LOCAL_NETWORK",
@@ -92,7 +92,7 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 		PodAffinityTerm: corev1.PodAffinityTerm{
 			LabelSelector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"egress-ip-name": eip.Name,
+					"egress-ip": eip.Spec.IP,
 				},
 			},
 			Namespaces:  []string{eip.Namespace},
