@@ -271,7 +271,7 @@ func containsString(slice []string, s string) bool {
 }
 
 func getGatewayName(eip *egressipv1alpha1.EgressIP) string {
-	return eip.Namespace + "-" + eip.Name + "-gateway"
+	return "egress-ip-gateway-" + eip.Namespace + "-" + eip.Name
 }
 
 func getGatewayNamespace() string {
