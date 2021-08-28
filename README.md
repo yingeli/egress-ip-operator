@@ -6,6 +6,11 @@ The Egress IP Operator is an implementation of a [Kubernetes Operator](https://k
 
 Firstly, ensure you have an VM-based AKS cluster (VMSS is not supported) with CNI networking. The Standard public IP address resources that will be used for egress traffic needs to be created in the node resource group of AKS. And your need to create an Azure service principle which will be used by the egress-ip-operator and add it as Contrinutor of the AKS node resource group.
 
+Install cert-manager:
+```
+$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+```
+
 Deploy egress-ip-operator into your AKS cluster:
 ```
 git clone https://github.com/yingeli/egress-ip-operator.git
