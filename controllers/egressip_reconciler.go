@@ -92,7 +92,7 @@ func (r *EgressIPReconciler) checkDeletion(ctx context.Context, eip *egressipv1a
 
 func (r *EgressIPReconciler) createOrUpdate(ctx context.Context, eip *egressipv1alpha1.EgressIP) error {
 	var deployment appsv1.Deployment
-	err := r.Get(ctx, getNamespacedName(eip), &deployment)
+	err := r.Get(ctx, getGatewayNamespacedName(eip), &deployment)
 	if err != nil {
 		if client.IgnoreNotFound(err) != nil {
 			return err
@@ -111,7 +111,7 @@ func (r *EgressIPReconciler) createOrUpdate(ctx context.Context, eip *egressipv1
 	}
 
 	var svc corev1.Service
-	err = r.Get(ctx, getNamespacedName(eip), &svc)
+	err = r.Get(ctx, getGatewayNamespacedName(eip), &svc)
 	if err != nil {
 		if client.IgnoreNotFound(err) != nil {
 			return err
@@ -254,13 +254,6 @@ func updateEgressIPService(service *corev1.Service, eip *egressipv1alpha1.Egress
 	}
 }
 
-func getNamespacedName(eip *egressipv1alpha1.EgressIP) types.NamespacedName {
-	return types.NamespacedName{
-		Name:      eip.Name,
-		Namespace: eip.Namespace,
-	}
-}
-
 func containsString(slice []string, s string) bool {
 	for _, item := range slice {
 		if item == s {
@@ -268,6 +261,13 @@ func containsString(slice []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func getGatewayNamespacedName(eip *egressipv1alpha1.EgressIP) types.NamespacedName {
+	return types.NamespacedName{
+		Name:      getGatewayName(eip),
+		Namespace: getGatewayNamespace(),
+	}
 }
 
 func getGatewayName(eip *egressipv1alpha1.EgressIP) string {

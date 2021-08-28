@@ -14,4 +14,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: yingeli/egress-ip-operator
-  newTag: 0.1.70
+  newTag: 0.1.71
