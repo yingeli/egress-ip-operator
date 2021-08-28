@@ -15,7 +15,7 @@ Deploy egress-ip-operator into your AKS cluster:
 ```
 git clone https://github.com/yingeli/egress-ip-operator.git
 cd egress-ip-operator
-make deploy IMG=yingeli/egress-ip-operator:0.1.72
+make deploy IMG=yingeli/egress-ip-operator:0.1.74
 ```
 
 A namespace "egress-ip" will be created during the deployment. Now we add the credential of the Azure service principle as secrets:
