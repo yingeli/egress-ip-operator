@@ -6,6 +6,7 @@ if [ $? -ne 0 ]; then
    echo "Failed to add route for "$LOCAL_NETWORK" via "$local_gateway
    exit 1
 fi
+ip route delete 0/0
 
 sed -i 's/lns = .*/lns = '$EGRESS_GATEWAY'/' /etc/xl2tpd/xl2tpd.conf
 /usr/sbin/xl2tpd -c /etc/xl2tpd/xl2tpd.conf -D
