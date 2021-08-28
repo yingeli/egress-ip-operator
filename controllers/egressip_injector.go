@@ -59,6 +59,27 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 	}
 
 	privileged := true
+	init := corev1.Container{
+		Name:            "egress-ip-director-init",
+		Image:           "yingeli/egress-ip-director",
+		ImagePullPolicy: "Always",
+		Command: []string{
+			"/init.sh",
+		},
+		SecurityContext: &corev1.SecurityContext{
+			Privileged: &privileged,
+		},
+		Env: []corev1.EnvVar{
+			{
+				Name:  "EGRESS_GATEWAY",
+				Value: getGatewayName(eip) + "." + getGatewayNamespace(),
+			},
+			{
+				Name:  "LOCAL_NETWORK",
+				Value: "10.0.0.0/8",
+			},
+		},
+	}
 	director := corev1.Container{
 		Name:            "egress-ip-director",
 		Image:           "yingeli/egress-ip-director",
@@ -77,6 +98,7 @@ func (a *EgressIPInjector) Handle(ctx context.Context, req admission.Request) ad
 			},
 		},
 	}
+	pod.Spec.InitContainers = append(pod.Spec.InitContainers, init)
 	pod.Spec.Containers = append(pod.Spec.Containers, director)
 
 	if pod.Spec.Affinity == nil {

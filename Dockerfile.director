@@ -6,8 +6,11 @@ RUN apk add --no-cache xl2tpd ppp \
 
 COPY ./director/xl2tpd.conf /etc/xl2tpd/xl2tpd.conf
 COPY ./director/options.xl2tpd.client /etc/ppp/options.xl2tpd.client
-COPY ./director/run.sh /
 
+COPY ./director/init.sh /
+RUN chmod 755 /init.sh
+
+COPY ./director/run.sh /
 RUN chmod 755 /run.sh
 
 CMD ["/run.sh"]
